@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import './App.css'
 
@@ -7,6 +8,8 @@ function App() {
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [error, setError] = useState('')
+  const [editingDeadline, setEditingDeadline] = useState(null)
+  const [newDeadline, setNewDeadline] = useState('')
 
   function addTask(event) {
     event.preventDefault()
@@ -39,6 +42,22 @@ function App() {
     )
   }
 
+  function startEditingDeadline(task) {
+    setEditingDeadline(task.id)
+    setNewDeadline(task.dueDate)
+  }
+
+  function saveDeadline(id) {
+    setTasks((previousTasks) =>
+      previousTasks.map((task) =>
+        task.id === id ? { ...task, dueDate: newDeadline } : task
+      )
+    )
+
+    setEditingDeadline(null)
+    setNewDeadline('')
+  }
+
   function deleteTask(id) {
     setTasks((previousTasks) =>
       previousTasks.filter((task) => task.id !== id)
@@ -68,6 +87,7 @@ function App() {
             onChange={(event) => setTitle(event.target.value)}
             placeholder="e.g. Complete Software Engineering assignment"
             maxLength={120}
+            required
           />
 
           <label htmlFor="description">Description</label>
@@ -108,9 +128,46 @@ function App() {
                 <div className="task-details">
                   <h3>{task.title}</h3>
                   {task.description && <p>{task.description}</p>}
-                  <p className="due-date">
-                    Due date: {task.dueDate || 'Not set'}
-                  </p>
+
+                  {editingDeadline === task.id ? (
+                    <div>
+                      <label htmlFor={`deadline-${task.id}`}>
+                        Update deadline
+                      </label>
+                      <input
+                        id={`deadline-${task.id}`}
+                        type="date"
+                        value={newDeadline}
+                        onChange={(event) =>
+                          setNewDeadline(event.target.value)
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => saveDeadline(task.id)}
+                      >
+                        Save Deadline
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingDeadline(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="due-date">
+                        Due date: {task.dueDate || 'Not set'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => startEditingDeadline(task)}
+                      >
+                        Edit Deadline
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div className="task-actions">
